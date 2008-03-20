@@ -1,0 +1,8 @@
+*.class
+classes/*
+*.iws
+*.ipr
+*.iml
+*.orig
+.svn
+out/*

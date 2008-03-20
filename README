@@ -1,0 +1,12 @@
+If you want to contribute, contact me by skype(vitaliel) or gtalk
+or join the assembla space:
+
+http://www.assembla.com/spaces/git4idea/
+
+= Notes
+This plugin is based on Mercurila plugin for IntelliJIdea,
+http://code.google.com/p/mercurialidea/
+
+Some time ago I want to start a git plugin based on svn2idea plugin,
+but it is too complicated and after I found mercurial plugin, 
+I decided to start a git plugin based on hg integration.
