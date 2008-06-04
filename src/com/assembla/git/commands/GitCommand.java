@@ -116,10 +116,18 @@ public class GitCommand
 		for( StringTokenizer i = new StringTokenizer( output, "\n\r" ); i.hasMoreTokens(); )
 		{
 			final String s = i.nextToken();
-			String[] larr = s.split( " " );
-			GitFile file = new GitFile( getBasePath() + File.separator + larr[1], convertStatus( larr[0] ) );
-			result.add( file );
-		}
+            String tab = "\t";
+            if(s.contains(tab)){
+                String[] larr = s.split( tab );
+                // git adds a header and footer
+                if(larr.length != 2){
+                    throw new VcsException("can't parse git output >" + s + "<");
+                } else {
+                    GitFile file = new GitFile( getBasePath() + File.separator + larr[1], convertStatus( larr[0] ) );
+                    result.add( file );
+                }
+            }
+        }
 
 		return result;
 	}
@@ -385,7 +393,8 @@ public class GitCommand
 	 */
 	private GitFile.Status convertStatus( String status ) throws VcsException
 	{
-		if( status.equals( "A" ) )
+        // statuses wrong
+        if( status.equals( "A" ) )
 			return GitFile.Status.ADDED;
 		else if( status.equals( "M" ) )
 			return GitFile.Status.MODIFIED;
