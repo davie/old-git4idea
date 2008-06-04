@@ -6,6 +6,7 @@ import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.*;
 import com.intellij.util.ui.ColumnInfo;
+import com.assembla.git.commands.GitCommand;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,7 +56,7 @@ public class GitHistoryProvider implements VcsHistoryProvider
 	@Nullable
 	public VcsHistorySession createSessionFor( FilePath filePath ) throws VcsException
 	{
-		com.assembla.git.commands.GitCommand command = new com.assembla.git.commands.GitCommand( project, settings, GitUtil.getVcsRoot(project, filePath) );
+		GitCommand command = new GitCommand( project, settings, GitUtil.getVcsRoot(project, filePath) );
 		List<VcsFileRevision> revisions = command.log( filePath );
 
 		return new VcsHistorySession( revisions )

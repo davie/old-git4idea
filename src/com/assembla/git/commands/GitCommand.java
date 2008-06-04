@@ -106,12 +106,22 @@ public class GitCommand
 	{
 
 		List<String> args = new ArrayList<String>();
-		if( includeAll )
+        // ignore the cache for now
+        //        args.add("-c");
+        args.add("-d");
+        args.add("-m");
+        args.add("-o");
+        args.add("-t");
+        if( includeAll )
 			args.add( "-A" );
 		if( path != null )
 			args.add( getRelativeFilePath( path, vcsRoot ) );
 
-		String output = convertStreamToString( execute( "status", args ) );
+        // DM TODO change the git command to:
+        // git-ls-files -c -d -m -o  -t
+        // -c gives cached, we might not need this.
+        // to get a more parsable form of output (possibly -z too)
+        String output = convertStreamToString( execute( "ls-files", args ) );
         return new GitStatusParser(getBasePath()).parse(output);
 	}
 

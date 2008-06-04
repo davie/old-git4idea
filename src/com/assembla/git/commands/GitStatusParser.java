@@ -22,20 +22,19 @@ class GitStatusParser {
         Set<GitFile> result = new HashSet<GitFile>();
         for (StringTokenizer i = new StringTokenizer(output, "\n\r"); i.hasMoreTokens();) {
             final String s = i.nextToken();
-            String tab = "\t";
-            if (s.contains(tab)) {
-                String[] larr = s.split(tab);
+            String separator = " ";
+            if (s.contains(separator)) {
+                String[] larr = s.split(separator);
                 // git adds a header and footer
                 if (larr.length != 2) {
                     throw new VcsException("can't parse git output >" + s + "<");
                 } else {
-                    //#	modified:   src/SomeFile.java
-                    String[] fileNameAndStatus = larr[1].split(":\\s+");
-                    String fileName = fileNameAndStatus[1];
-                    String status = fileNameAndStatus[0];
+                        String fileName = larr[1];
+                        String status = larr[0];
 
-                    GitFile file = new GitFile(basePath + File.separator + fileName, convertStatus(status));
-                    result.add(file);
+                        GitFile file = new GitFile(basePath + File.separator + fileName, convertStatus(status));
+                        result.add(file);
+                    
                 }
             }
         }
@@ -56,7 +55,7 @@ class GitStatusParser {
 
         if (status.equals("A"))
             return GitFile.Status.ADDED;
-        else if (status.equals("modified"))
+        else if (status.equals("C"))
             return GitFile.Status.MODIFIED;
         else if (status.equals("?"))
             return GitFile.Status.UNVERSIONED;
