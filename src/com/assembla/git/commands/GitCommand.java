@@ -104,7 +104,6 @@ public class GitCommand
 
 	public Set<GitFile> status( String path, boolean includeAll ) throws VcsException
 	{
-		Set<GitFile> result = new HashSet<GitFile>();
 
 		List<String> args = new ArrayList<String>();
 		if( includeAll )
@@ -113,26 +112,11 @@ public class GitCommand
 			args.add( getRelativeFilePath( path, vcsRoot ) );
 
 		String output = convertStreamToString( execute( "status", args ) );
-		for( StringTokenizer i = new StringTokenizer( output, "\n\r" ); i.hasMoreTokens(); )
-		{
-			final String s = i.nextToken();
-            String tab = "\t";
-            if(s.contains(tab)){
-                String[] larr = s.split( tab );
-                // git adds a header and footer
-                if(larr.length != 2){
-                    throw new VcsException("can't parse git output >" + s + "<");
-                } else {
-                    GitFile file = new GitFile( getBasePath() + File.separator + larr[1], convertStatus( larr[0] ) );
-                    result.add( file );
-                }
-            }
-        }
-
-		return result;
+        return new GitStatusParser(getBasePath()).parse(output);
 	}
 
-	/**
+
+    /**
 	 * Loads a file from Git.
 	 *
 	 * @param path	 The path to the file.
@@ -383,35 +367,6 @@ public class GitCommand
 		return vcsRoot.getPath();
 	}
 
-	/**
-	 * Helper method to convert String status' from the Git output to a GitFile status
-	 *
-	 * @param status The status from Git as a String.
-	 * @return The Git file status.
-	 * @throws com.intellij.openapi.vcs.VcsException
-	 *          something bad had happened
-	 */
-	private GitFile.Status convertStatus( String status ) throws VcsException
-	{
-        // statuses wrong
-        if( status.equals( "A" ) )
-			return GitFile.Status.ADDED;
-		else if( status.equals( "M" ) )
-			return GitFile.Status.MODIFIED;
-		else if( status.equals( "?" ) )
-			return GitFile.Status.UNVERSIONED;
-		else if( status.equals( "R" ) || status.equals( "!" ) )
-			return GitFile.Status.DELETED;
-		else if( status.equals( "C" ) )
-			return GitFile.Status.UNMODIFIED;
-		else if( status.equals( "I" ) )
-			return GitFile.Status.IGNORED;
-
-		LOG.warn( "Unknown status: " + status );
-
-		return GitFile.Status.UNMODIFIED;
-	}
-
 	public void commit( Set<String> paths, String message ) throws VcsException
 	{
 		String[] options = new String[2];
@@ -645,4 +600,5 @@ public class GitCommand
 		args[1] = getRelativeFilePath( toDir.getPath() + "/" + copyName, vcsRoot );
 		execute( "copy", (String[]) null, args );
 	}
+
 }

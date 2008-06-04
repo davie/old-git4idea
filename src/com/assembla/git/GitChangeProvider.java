@@ -10,6 +10,7 @@ import com.intellij.openapi.vcs.changes.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.vcsUtil.VcsUtil;
+import com.assembla.git.commands.GitCommand;
 
 import java.util.Set;
 import java.util.LinkedHashSet;
@@ -63,7 +64,7 @@ public class GitChangeProvider implements ChangeProvider
 			return;
 		}
 
-		com.assembla.git.commands.GitCommand command = new com.assembla.git.commands.GitCommand( project, settings, vcsRoot );
+		GitCommand command = new GitCommand( project, settings, vcsRoot );
 		try
 		{
 			//grab all changes per vcs root in one hg st command
