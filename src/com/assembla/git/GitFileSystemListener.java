@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.newvfs.RefreshQueue;
 import com.intellij.openapi.vfs.newvfs.RefreshSession;
 import com.intellij.vcsUtil.VcsUtil;
+import com.assembla.git.commands.GitCommand;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,7 +104,7 @@ public class GitFileSystemListener implements LocalFileOperationsHandler, Comman
 	 */
 	private boolean deleteFile( VirtualFile file )
 	{
-		com.assembla.git.commands.GitCommand command = new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+		GitCommand command = new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 		VirtualFile[] files = new VirtualFile[1];
 		files[0] = file;
 		try
@@ -115,7 +116,7 @@ public class GitFileSystemListener implements LocalFileOperationsHandler, Comman
 				if( f.getStatus() == GitFile.Status.ADDED )
 				{
 					// We revert and delete from the file system.
-					command = new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+					command = new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 					files[0] = VcsUtil.getVirtualFile( f.getPath() );
 					command.revert( files );
 					return false;
@@ -123,17 +124,17 @@ public class GitFileSystemListener implements LocalFileOperationsHandler, Comman
 				else if( f.getStatus() == GitFile.Status.MODIFIED )
 				{
 					// We revert and delete from the file system.
-					command = new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+					command = new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 					files[0] = VcsUtil.getVirtualFile( f.getPath() );
 					command.revert( files );
-					command = new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+					command = new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 					command.delete( files );
 					return true;
 				}
 				else
 				{
 					// We get Git to do it.
-					command = new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+					command = new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 					files[0] = VcsUtil.getVirtualFile( f.getPath() );
 					command.delete( files );
 					return true;
@@ -151,7 +152,7 @@ public class GitFileSystemListener implements LocalFileOperationsHandler, Comman
 
 	private GitFile.Status getFileStatus( VirtualFile file, boolean forceStatus ) throws VcsException
 	{
-		com.assembla.git.commands.GitCommand command = new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+		GitCommand command = new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 		Set<GitFile> files = command.status( file.getPath(), forceStatus );
 		assert files.size() == 1 : "Returned more than one status";
 
@@ -162,8 +163,8 @@ public class GitFileSystemListener implements LocalFileOperationsHandler, Comman
 
 	public boolean move( VirtualFile file, VirtualFile toDir ) throws IOException
 	{
-		com.assembla.git.commands.GitCommand moveCommand =
-				new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+		GitCommand moveCommand =
+				new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 		try
 		{
 			File destinationFile = new File( new File( toDir.getPath() ).getAbsoluteFile(), file.getName() );
@@ -183,8 +184,8 @@ public class GitFileSystemListener implements LocalFileOperationsHandler, Comman
 	@Nullable
 	public File copy( VirtualFile file, VirtualFile toDir, String copyName ) throws IOException
 	{
-		com.assembla.git.commands.GitCommand copyCommand =
-				new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+		GitCommand copyCommand =
+				new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 		try
 		{
 			File destinationFile = new File( new File( toDir.getPath() ).getAbsoluteFile(), copyName );
@@ -203,8 +204,8 @@ public class GitFileSystemListener implements LocalFileOperationsHandler, Comman
 
 	public boolean rename( VirtualFile file, String newName ) throws IOException
 	{
-		com.assembla.git.commands.GitCommand command =
-				new com.assembla.git.commands.GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
+		GitCommand command =
+				new GitCommand( project, host.getSettings(), GitUtil.getVcsRoot( project, file ) );
 
 		try
 		{

@@ -11,17 +11,9 @@ import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.EnvironmentUtil;
-import org.apache.xerces.parsers.DOMParser;
 import org.jetbrains.annotations.NotNull;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import java.io.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @SuppressWarnings( { "ResultOfMethodCallIgnored" } )
@@ -38,8 +30,9 @@ public class GitCommand
 	private Project project;
 	private final GitVcsSettings settings;
 	private VirtualFile vcsRoot;
+    private GitLogParser gitLogParser = new GitLogParser();
 
-	public GitCommand( @NotNull final Project project, @NotNull GitVcsSettings settings, @NotNull VirtualFile vcsRoot )
+    public GitCommand( @NotNull final Project project, @NotNull GitVcsSettings settings, @NotNull VirtualFile vcsRoot )
 	{
 		this.vcsRoot = vcsRoot;
 		this.project = project;
@@ -423,18 +416,11 @@ public class GitCommand
 	{
 		String[] options = new String[]
 				{
-						"--style",
-						""
+						"--pretty=format:'%h|%an|%ci|%s'"
 				};
 
-		// Load the path to the plugins directory.
-		String path = PathManager.getPluginsPath();
-        // FIXME this file isn't part of this project, and git log doesn't take a style argument...
-        //       So this won't even come close to working
-        path = path + File.separator + "gitPlugin" + File.separator + "templates" + File.separator + "log.template";
-		options[1] = path;
 
-		String[] args = new String[]
+        String[] args = new String[]
 				{
 						getRelativeFilePath( filePath.getPath(), vcsRoot )
 				};
@@ -442,65 +428,12 @@ public class GitCommand
 		String result = convertStreamToString( execute( "log", options, args ) );
 		GitVcs.getInstance( project ).showMessages( result );
 
-		List<VcsFileRevision> revisions = new ArrayList<VcsFileRevision>();
 
-		BufferedReader in = new BufferedReader( new StringReader( "<logs>" + result + "</logs>" ) );
-
-		SimpleDateFormat df = new SimpleDateFormat( "yyyy-mm-dd HH:mm Z" );
-
-		// Pull the result apart...
-		DOMParser parser = new DOMParser();
-		try
-		{
-			parser.parse( new InputSource( in ) );
-			Document doc = parser.getDocument();
-			NodeList list = doc.getElementsByTagName( "log" );
-			for( int i = 0; i < list.getLength(); i++ )
-			{
-				Node logNode = list.item( i );
-
-				GitFileRevision rev = new GitFileRevision( project );
-				rev.setPath( filePath );
-				// Start loading the items in the log.
-				NodeList logEntryList = logNode.getChildNodes();
-				for( int j = 0; j < logEntryList.getLength(); j++ )
-				{
-					Node entry = logEntryList.item( j );
-					if( entry.getNodeName().equals( "revision" ) )
-						rev.setRevision( new GitRevisionNumber( Integer.parseInt( entry.getTextContent() ) ) );
-					else if( entry.getNodeName().equals( "date" ) )
-					{
-						try
-						{
-							rev.setRevisionDate( df.parse( entry.getTextContent() ) );
-						}
-						catch( ParseException e )
-						{
-							// Continue - a malformed date is not that serious.
-						}
-					}
-					else if( entry.getNodeName().equals( "author" ) )
-						rev.setAuthor( entry.getFirstChild().getTextContent() );
-					else if( entry.getNodeName().equals( "description" ) )
-						rev.setMessage( entry.getFirstChild().getTextContent() );
-
-				}
-				revisions.add( rev );
-			}
-
-		}
-		catch( SAXException e )
-		{
-			throw new VcsException( e );
-		}
-		catch( IOException e )
-		{
-			throw new VcsException( e );
-		}
-		return revisions;
+        List<VcsFileRevision> revisions = gitLogParser.getRevisionsFrom(filePath, result, project);
+        return revisions;
 	}
 
-	public String version() throws VcsException
+    public String version() throws VcsException
 	{
 		return convertStreamToString( execute( "version" ) );
 	}
