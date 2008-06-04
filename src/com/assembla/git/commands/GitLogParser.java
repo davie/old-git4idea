@@ -30,10 +30,8 @@ class GitLogParser {
                 // FIXME git revisions are SHA1, not ints
                 rev.setRevision(new GitRevisionNumber(revision++));
                 // rev.setRevision(new GitRevisionNumber(Integer.parseInt(fields[0])));
-                Date date;
                 rev.setAuthor(fields[1]);
-                date = getDate(fields[2]);
-                rev.setRevisionDate(date);
+                rev.setRevisionDate(getDate(fields[2]));
                 rev.setMessage(fields[3]);
                 revisions.add(rev);
         }

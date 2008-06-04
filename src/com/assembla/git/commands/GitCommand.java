@@ -416,7 +416,7 @@ public class GitCommand
 	{
 		String[] options = new String[]
 				{
-						"--pretty=format:'%h|%an|%ci|%s'"
+						"--pretty=format:%h|%an|%ci|%s"
 				};
 
 
