@@ -31,7 +31,8 @@ public class GitCommand
 
 	public static final String ADD_CMD = "add";
 	public static final String REVERT_CMD = "revert";
-	private static final String CAT_CMD = "cat";
+    // FIXME cat doesn't exist in git
+    private static final String CAT_CMD = "cat";
 	private static final String DELETE_CMD = "rm";
 
 	private Project project;
@@ -428,7 +429,9 @@ public class GitCommand
 
 		// Load the path to the plugins directory.
 		String path = PathManager.getPluginsPath();
-		path = path + File.separator + "gitPlugin" + File.separator + "templates" + File.separator + "log.template";
+        // FIXME this file isn't part of this project, and git log doesn't take a style argument...
+        //       So this won't even come close to working
+        path = path + File.separator + "gitPlugin" + File.separator + "templates" + File.separator + "log.template";
 		options[1] = path;
 
 		String[] args = new String[]

@@ -24,13 +24,12 @@ class GitStatusParser {
             final String s = i.nextToken();
             String separator = " ";
             if (s.contains(separator)) {
-                String[] larr = s.split(separator);
-                // git adds a header and footer
-                if (larr.length != 2) {
+                String[] statusAndFileName = s.split(separator);
+                if (statusAndFileName.length != 2) {
                     throw new VcsException("can't parse git output >" + s + "<");
                 } else {
-                        String fileName = larr[1];
-                        String status = larr[0];
+                        String fileName = statusAndFileName[1];
+                        String status = statusAndFileName[0];
 
                         GitFile file = new GitFile(basePath + File.separator + fileName, convertStatus(status));
                         result.add(file);
