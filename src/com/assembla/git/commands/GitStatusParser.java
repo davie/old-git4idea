@@ -29,9 +29,12 @@ class GitStatusParser {
                 if (larr.length != 2) {
                     throw new VcsException("can't parse git output >" + s + "<");
                 } else {
-                    String fileName = larr[1];
-                    String statusDescription = larr[0];
-                    GitFile file = new GitFile(basePath + File.separator + fileName, convertStatus(statusDescription));
+                    //#	modified:   src/SomeFile.java
+                    String[] fileNameAndStatus = larr[1].split(":\\s+");
+                    String fileName = fileNameAndStatus[1];
+                    String status = fileNameAndStatus[0];
+
+                    GitFile file = new GitFile(basePath + File.separator + fileName, convertStatus(status));
                     result.add(file);
                 }
             }
@@ -50,9 +53,10 @@ class GitStatusParser {
      */
     private GitFile.Status convertStatus(String status) throws VcsException {
         // statuses wrong
+
         if (status.equals("A"))
             return GitFile.Status.ADDED;
-        else if (status.equals("M"))
+        else if (status.equals("modified"))
             return GitFile.Status.MODIFIED;
         else if (status.equals("?"))
             return GitFile.Status.UNVERSIONED;
@@ -64,6 +68,7 @@ class GitStatusParser {
             return GitFile.Status.IGNORED;
 
         LOG.warn("Unknown status: " + status);
+        System.out.println("Unknown status: " + status);
 
         return GitFile.Status.UNMODIFIED;
     }
