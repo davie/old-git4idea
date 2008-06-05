@@ -1,7 +1,6 @@
 package com.assembla.git.commands;
 
 import org.junit.Test;
-import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 
 import java.util.List;

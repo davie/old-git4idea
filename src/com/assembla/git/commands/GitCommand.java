@@ -128,7 +128,7 @@ public class GitCommand
 	 * @return The contents of the revision as a String.
 	 * @throws VcsException If the load of the file fails.
 	 */
-	public byte[] cat( String path, int revision ) throws VcsException
+	public byte[] cat( String path, String revision ) throws VcsException
 	{
 		if( path == null || path.equals( "" ) )
 			throw new VcsException( "Illegal argument to cat" );
@@ -429,8 +429,7 @@ public class GitCommand
 		GitVcs.getInstance( project ).showMessages( result );
 
 
-        List<VcsFileRevision> revisions = gitLogParser.getRevisionsFrom(filePath, result, project);
-        return revisions;
+        return gitLogParser.getRevisionsFrom(filePath, result, project);
 	}
 
     public String version() throws VcsException

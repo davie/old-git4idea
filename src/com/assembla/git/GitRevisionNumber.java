@@ -4,36 +4,34 @@ import com.intellij.openapi.vcs.history.VcsRevisionNumber;
 
 public class GitRevisionNumber implements VcsRevisionNumber
 {
-	public static final int TIP = -1;
+	public static final String TIP = "-1";
 	
-	private int number;
+    private final String version;
 
-	public GitRevisionNumber( int version )
-	{
-		this.number = version;
-	}
+    public GitRevisionNumber(String version) {
+        this.version = version;
+    }
 
-	public String asString()
+    public String asString()
 	{
-		if( number == TIP )
+		if( TIP.equals(version) )
 			return "tip";
-		return String.valueOf( number );
+		return String.valueOf( version );
 	}
 
-	public int compareTo( VcsRevisionNumber vcsRevisionNumber )
+    // TODO ordering on hash doesn't make sense
+    public int compareTo( VcsRevisionNumber vcsRevisionNumber )
 	{
-		com.assembla.git.GitRevisionNumber rev = (com.assembla.git.GitRevisionNumber) vcsRevisionNumber;
+		GitRevisionNumber rev = (GitRevisionNumber) vcsRevisionNumber;
 
-		if( getNumber() < rev.getNumber() )
-			return -1;
-		else if( getNumber() == rev.getNumber() )
+		if( getNumber().equals(rev.getNumber()))
 			return 0;
 		else
 			return 1;
 	}
 
-	public int getNumber()
+	public String getNumber()
 	{
-		return number;
+		return version;
 	}
 }

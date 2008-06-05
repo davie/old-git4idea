@@ -5,6 +5,7 @@ import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vcs.history.VcsRevisionNumber;
+import com.assembla.git.commands.GitCommand;
 
 import java.io.IOException;
 import java.util.Date;
@@ -67,7 +68,7 @@ public class GitFileRevision implements VcsFileRevision
 
 	public void loadContent() throws VcsException
 	{
-		com.assembla.git.commands.GitCommand command = new com.assembla.git.commands.GitCommand( project, GitVcsSettings.getInstance( project ), GitUtil.getVcsRoot(project, path) );
+		GitCommand command = new GitCommand( project, GitVcsSettings.getInstance( project ), GitUtil.getVcsRoot(project, path) );
 		content = command.cat( path.getPath(), revision.getNumber() );
 	}
 
