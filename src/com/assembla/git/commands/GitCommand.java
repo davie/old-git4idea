@@ -24,7 +24,7 @@ public class GitCommand
 	public static final String ADD_CMD = "add";
 	public static final String REVERT_CMD = "revert";
     // FIXME cat doesn't exist in git
-    private static final String CAT_CMD = "cat";
+    private static final String CAT_CMD = "show";
 	private static final String DELETE_CMD = "rm";
 
 	private Project project;
@@ -131,16 +131,12 @@ public class GitCommand
 	public byte[] cat( String path, String revision ) throws VcsException
 	{
 		if( path == null || path.equals( "" ) )
-			throw new VcsException( "Illegal argument to cat" );
+			throw new VcsException( "Illegal argument to show" );
 
 		String vcsPath = getRelativeFilePath( path, vcsRoot );
-		String revisionCmd = "-r";
-		if( revision == GitRevisionNumber.TIP )
-			revisionCmd = null;
-		else
-			revisionCmd += String.valueOf( revision );
+        String options = revision + ":" + vcsPath;
 
-		InputStream in = execute( CAT_CMD, revisionCmd, vcsPath );
+		InputStream in = execute( CAT_CMD, options);
 
 		try
 		{
@@ -416,7 +412,7 @@ public class GitCommand
 	{
 		String[] options = new String[]
 				{
-						"--pretty=format:%h|%an|%ci|%s"
+						"--pretty=format:%H|%an|%ci|%s"
 				};
 
 

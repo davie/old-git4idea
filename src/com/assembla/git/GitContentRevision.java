@@ -47,6 +47,6 @@ public class GitContentRevision implements ContentRevision
 	@NotNull
 	public VcsRevisionNumber getRevisionNumber()
 	{
-		return VcsRevisionNumber.NULL;
+		return revision;
 	}
 }
