@@ -6,6 +6,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vcs.*;
 import com.intellij.openapi.vcs.changes.VcsDirtyScopeManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import static com.assembla.git.GitUtil.*;
+import com.assembla.git.commands.GitCommand;
+import com.assembla.git.GitVcsSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -32,10 +35,10 @@ public class Add extends BasicAction
         if( !ProjectLevelVcsManager.getInstance( project ).checkAllFilesAreUnder( com.assembla.git.GitVcs.getInstance( project ), affectedFiles ) )
             return;
 
-        final Map<VirtualFile,List<VirtualFile>> roots = com.assembla.git.GitUtil.sortFilesByVcsRoot(project, affectedFiles);
+        final Map<VirtualFile,List<VirtualFile>> roots = sortFilesByVcsRoot(project, affectedFiles);
 
         for (VirtualFile root : roots.keySet()) {
-            com.assembla.git.commands.GitCommand command = new com.assembla.git.commands.GitCommand( project, com.assembla.git.GitVcsSettings.getInstance( project ), root );
+            GitCommand command = new GitCommand( project, GitVcsSettings.getInstance( project ), root );
             command.add( roots.get(root) );
         }
 

@@ -9,5 +9,5 @@ public class GitRevisionNumberTest {
         GitRevisionNumber revision = new GitRevisionNumber(sha1);
         assertEquals(sha1, revision.getNumber());
     }
-    
+
 }

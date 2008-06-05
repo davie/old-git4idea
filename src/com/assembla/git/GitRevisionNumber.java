@@ -4,7 +4,7 @@ import com.intellij.openapi.vcs.history.VcsRevisionNumber;
 
 public class GitRevisionNumber implements VcsRevisionNumber
 {
-	public static final String TIP = "-1";
+	public static final String TIP = "HEAD";
 	
     private final String version;
 

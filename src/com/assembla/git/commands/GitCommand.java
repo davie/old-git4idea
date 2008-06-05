@@ -23,8 +23,7 @@ public class GitCommand
 
 	public static final String ADD_CMD = "add";
 	public static final String REVERT_CMD = "revert";
-    // FIXME cat doesn't exist in git
-    private static final String CAT_CMD = "show";
+    private static final String SHOW_CMD = "show";
 	private static final String DELETE_CMD = "rm";
 
 	private Project project;
@@ -136,7 +135,7 @@ public class GitCommand
 		String vcsPath = getRelativeFilePath( path, vcsRoot );
         String options = revision + ":" + vcsPath;
 
-		InputStream in = execute( CAT_CMD, options);
+		InputStream in = execute(SHOW_CMD, options);
 
 		try
 		{

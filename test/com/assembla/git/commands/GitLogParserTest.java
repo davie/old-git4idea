@@ -25,8 +25,7 @@ public class GitLogParserTest {
         assertEquals(author, fileRevisionList.get(0).getAuthor());
         assertEquals(df.parse(date), fileRevisionList.get(0).getRevisionDate());
         assertEquals(comment, fileRevisionList.get(0).getCommitMessage());
-        // FIXME put this back when revision numbers are fixed
-        //        assertEquals(revision, fileRevisionList.get(0).getRevisionNumber());
+        assertEquals(revision, fileRevisionList.get(0).getRevisionNumber().asString());
 
     }
 }
