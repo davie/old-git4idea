@@ -24,13 +24,13 @@ public class GitRevisionNumber implements VcsRevisionNumber
 	{
 		GitRevisionNumber rev = (GitRevisionNumber) vcsRevisionNumber;
 
-		if( getNumber().equals(rev.getNumber()))
+		if( getVersion().equals(rev.getVersion()))
 			return 0;
 		else
 			return 1;
 	}
 
-	public String getNumber()
+	public String getVersion()
 	{
 		return version;
 	}

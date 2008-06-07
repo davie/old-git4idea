@@ -7,7 +7,7 @@ public class GitRevisionNumberTest {
     public void shouldBeAbleToStoreSha1Hash(){
         String sha1 = "ed8bf4cece2834bd49dabc4c9423fbf4e4d2d54b";
         GitRevisionNumber revision = new GitRevisionNumber(sha1);
-        assertEquals(sha1, revision.getNumber());
+        assertEquals(sha1, revision.getVersion());
     }
 
 }

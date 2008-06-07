@@ -8,6 +8,7 @@ import com.intellij.openapi.vcs.FileStatusManager;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import com.assembla.git.GitFileSystem;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class RevisionGraph extends BasicAction
 	public void perform( @NotNull Project project, com.assembla.git.GitVcs vcs, @NotNull List<VcsException> exceptions,
 	                     @NotNull VirtualFile[] affectedFiles ) throws VcsException
 	{
-        String url = com.assembla.git.GitFileSystem.getRevisionGraphUrl(affectedFiles[0].getPath());
+        String url = GitFileSystem.getRevisionGraphUrl(affectedFiles[0].getPath());
 
         final VirtualFile vFile = VirtualFileManager.getInstance().findFileByUrl(url);
 

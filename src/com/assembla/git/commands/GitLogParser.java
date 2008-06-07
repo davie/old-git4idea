@@ -18,23 +18,28 @@ class GitLogParser {
     public List<VcsFileRevision> getRevisionsFrom(FilePath filePath, String result, Project project) throws VcsException {
         List<VcsFileRevision> revisions = new ArrayList<VcsFileRevision>();
 
-
-        int revision = 0;
         for (StringTokenizer i = new StringTokenizer(result, "\n\r"); i.hasMoreTokens();) {
             final String line = i.nextToken();
-                String[] fields = line.split("\\|");// FIXME this will break if there's a pipe in the commit message
+            String[] revisionInfo = line.split("\\|");// FIXME this will break if there's a pipe in the commit message
 
-                GitFileRevision rev = new GitFileRevision(project);
-                rev.setPath(filePath);
+            GitRevisionNumber revisionHash = new GitRevisionNumber(revisionInfo[0]);
+            GitFileRevision rev = new GitFileRevision(project, filePath, revisionHash, getDate(revisionInfo), getAuthor(revisionInfo), getMessage(revisionInfo));
 
-                // FIXME git revisions are SHA1, not ints
-                rev.setRevision(new GitRevisionNumber(fields[0]));
-                rev.setAuthor(fields[1]);
-                rev.setRevisionDate(getDate(fields[2]));
-                rev.setMessage(fields[3]);
-                revisions.add(rev);
+            revisions.add(rev);
         }
         return revisions;
+    }
+
+    private String getMessage(String[] fields) {
+        return fields[3];
+    }
+
+    private Date getDate(String[] fields) {
+        return getDate(fields[2]);
+    }
+
+    private String getAuthor(String[] fields) {
+        return fields[1];
     }
 
     private Date getDate(String stringValue) {

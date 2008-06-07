@@ -34,7 +34,7 @@ public class GitContentRevision implements ContentRevision
                 GitUtil.getVcsRoot(project, file));
 
         if( content == null )
-			content = command.cat( file.getPath(), revision.getNumber() );
+			content = command.cat( file.getPath(), revision.getVersion() );
 		return GitCommand.convertStreamToString( new ByteArrayInputStream( content ) );
 	}
 

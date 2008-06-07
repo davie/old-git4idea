@@ -9,6 +9,10 @@ import com.intellij.openapi.vcs.FileStatusManager;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.changes.VcsDirtyScopeManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.assembla.git.commands.GitCommand;
+import com.assembla.git.GitVcsSettings;
+import com.assembla.git.GitVcs;
+import com.assembla.git.GitUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -19,7 +23,7 @@ public class Revert extends BasicAction
 	/**
 	 * Revert the selected file.
 	 */
-	public void perform( @NotNull Project project, com.assembla.git.GitVcs vcs, @NotNull List<VcsException> exceptions,
+	public void perform( @NotNull Project project, GitVcs vcs, @NotNull List<VcsException> exceptions,
 	                     @NotNull VirtualFile[] affectedFiles ) throws VcsException
 	{
 		ApplicationManager.getApplication().runWriteAction(
@@ -31,10 +35,10 @@ public class Revert extends BasicAction
 					}
 				} );
 
-        final Map<VirtualFile,List<VirtualFile>> roots = com.assembla.git.GitUtil.sortFilesByVcsRoot(project, affectedFiles);
+        final Map<VirtualFile,List<VirtualFile>> roots = GitUtil.sortFilesByVcsRoot(project, affectedFiles);
 
         for (VirtualFile root : roots.keySet()) {
-            com.assembla.git.commands.GitCommand command = new com.assembla.git.commands.GitCommand( project, com.assembla.git.GitVcsSettings.getInstance( project ), root );
+            GitCommand command = new GitCommand( project, GitVcsSettings.getInstance( project ), root );
             command.revert( roots.get(root) );
         }
 
@@ -52,7 +56,7 @@ public class Revert extends BasicAction
 		return "Revert";
 	}
 
-	protected boolean isEnabled( @NotNull Project project, @NotNull com.assembla.git.GitVcs vcs, @NotNull VirtualFile... vFiles )
+	protected boolean isEnabled( @NotNull Project project, @NotNull GitVcs vcs, @NotNull VirtualFile... vFiles )
 	{
 		for( VirtualFile file : vFiles )
 		{

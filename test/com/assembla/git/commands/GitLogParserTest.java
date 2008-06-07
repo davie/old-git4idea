@@ -21,6 +21,7 @@ public class GitLogParserTest {
         String logMessage = revision + "|" + author + "|" + date + "|" + comment;
 
         List<VcsFileRevision> fileRevisionList = new GitLogParser().getRevisionsFrom(null, logMessage, null);
+        
         assertEquals(1, fileRevisionList.size());
         assertEquals(author, fileRevisionList.get(0).getAuthor());
         assertEquals(df.parse(date), fileRevisionList.get(0).getRevisionDate());

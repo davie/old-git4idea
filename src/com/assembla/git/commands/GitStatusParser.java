@@ -20,13 +20,14 @@ class GitStatusParser {
 
     public Set<GitFile> parse(String output) throws VcsException {
         Set<GitFile> result = new HashSet<GitFile>();
+
         for (StringTokenizer i = new StringTokenizer(output, "\n\r"); i.hasMoreTokens();) {
-            final String s = i.nextToken();
+            final String line = i.nextToken();
             String separator = " ";
-            if (s.contains(separator)) {
-                String[] statusAndFileName = s.split(separator);
+            if (line.contains(separator)) {
+                String[] statusAndFileName = line.split(separator);
                 if (statusAndFileName.length != 2) {
-                    throw new VcsException("can't parse git output >" + s + "<");
+                    throw new VcsException("can't parse git output >" + line + "<");
                 } else {
                         String fileName = statusAndFileName[1];
                         String status = statusAndFileName[0];

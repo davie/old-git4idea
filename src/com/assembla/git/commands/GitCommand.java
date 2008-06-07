@@ -236,8 +236,7 @@ public class GitCommand
 		List<String> cmdLine = new ArrayList<String>();
 
 		String[] execCmds = settings.GIT_EXECUTABLE.split( " " );
-		for( String c : execCmds )
-			cmdLine.add( c );
+        cmdLine.addAll(Arrays.asList(execCmds));
 
 		cmdLine.add( cmd );
 		cmdLine.addAll( cmdArgs );

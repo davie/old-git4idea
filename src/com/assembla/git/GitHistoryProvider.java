@@ -6,11 +6,13 @@ import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.*;
 import com.intellij.util.ui.ColumnInfo;
+import com.intellij.util.TreeItem;
 import com.assembla.git.commands.GitCommand;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class GitHistoryProvider implements VcsHistoryProvider
 {
@@ -65,7 +67,7 @@ public class GitHistoryProvider implements VcsHistoryProvider
 			protected VcsRevisionNumber calcCurrentRevisionNumber()
 			{
 				//todo
-				return null;
+				return new GitRevisionNumber(GitRevisionNumber.TIP);
 			}
 		};
 	}
@@ -73,6 +75,16 @@ public class GitHistoryProvider implements VcsHistoryProvider
 	@Nullable
 	public HistoryAsTreeProvider getTreeHistoryProvider()
 	{
-		return null; // Not implemented.
+        return new HistoryAsTreeProvider() {
+            // FIXMEignore branches for now...
+            public List<TreeItem<VcsFileRevision>> createTreeOn(List<VcsFileRevision> vcsFileRevisions) {
+                List<TreeItem<VcsFileRevision>> tree = new ArrayList<TreeItem<VcsFileRevision>>();
+                for (VcsFileRevision revision : vcsFileRevisions) {
+                    tree.add(new TreeItem<VcsFileRevision>(revision));
+
+                }
+                return tree;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+        };
 	}
 }
