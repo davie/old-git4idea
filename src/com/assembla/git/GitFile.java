@@ -37,6 +37,6 @@ public class GitFile
         UNVERSIONED,
         UNMODIFIED,
         DELETED,
-		IGNORED;
+		IGNORED
     }
 }

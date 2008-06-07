@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import static com.assembla.git.GitUtil.*;
 import com.assembla.git.commands.GitCommand;
 import com.assembla.git.GitVcsSettings;
+import com.assembla.git.GitVcs;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 public class Add extends BasicAction
 {
-	public void perform( @NotNull Project project, com.assembla.git.GitVcs mksVcs, @NotNull List<VcsException> exceptions,
+	public void perform( @NotNull Project project, GitVcs mksVcs, @NotNull List<VcsException> exceptions,
 	                     @NotNull VirtualFile[] affectedFiles ) throws VcsException
 	{
         addFiles(project, affectedFiles);
@@ -32,7 +33,7 @@ public class Add extends BasicAction
                     }
                 } );
 
-        if( !ProjectLevelVcsManager.getInstance( project ).checkAllFilesAreUnder( com.assembla.git.GitVcs.getInstance( project ), affectedFiles ) )
+        if( !ProjectLevelVcsManager.getInstance( project ).checkAllFilesAreUnder( GitVcs.getInstance( project ), affectedFiles ) )
             return;
 
         final Map<VirtualFile,List<VirtualFile>> roots = sortFilesByVcsRoot(project, affectedFiles);
@@ -56,7 +57,7 @@ public class Add extends BasicAction
 		return "Add";
 	}
 
-	protected boolean isEnabled( @NotNull Project project, @NotNull com.assembla.git.GitVcs vcs, @NotNull VirtualFile... vFiles )
+	protected boolean isEnabled( @NotNull Project project, @NotNull GitVcs vcs, @NotNull VirtualFile... vFiles )
 	{
 		for( VirtualFile file : vFiles )
 		{

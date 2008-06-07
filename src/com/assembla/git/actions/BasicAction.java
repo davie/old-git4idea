@@ -52,7 +52,7 @@ public abstract class BasicAction extends AnAction
 		List<VcsException> exceptions = helper.runTransactionRunnable(
 				mksvcs, new TransactionRunnable()
 		{
-			public void run( List exceptions )
+			public void run( List<VcsException> exceptions )
 			{
 				final VirtualFile[] affectedFiles = collectAffectedFiles( project, vFiles );
 				//noinspection unchecked
