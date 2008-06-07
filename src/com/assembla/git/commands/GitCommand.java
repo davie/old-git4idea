@@ -110,8 +110,6 @@ public class GitCommand
 		if( path != null )
 			args.add( getRelativeFilePath( path, vcsRoot ) );
 
-        // DM TODO change the git command to:
-        // git-ls-files -c -d -m -o  -t
         // -c gives cached, we might not need this.
         // to get a more parsable form of output (possibly -z too)
         String output = convertStreamToString( execute( "ls-files", args ) );
