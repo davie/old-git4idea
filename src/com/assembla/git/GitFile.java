@@ -2,8 +2,8 @@ package com.assembla.git;
 
 public class GitFile
 {
-	private String path;
-	private Status status;
+	private final String path;
+	private final Status status;
 
 	public GitFile( String path, Status status )
 	{
@@ -16,19 +16,9 @@ public class GitFile
 		return path;
 	}
 
-	public void setPath( String path )
-	{
-		this.path = path;
-	}
-
-	public Status getStatus()
+    public Status getStatus()
 	{
 		return status;
-	}
-
-	public void setStatus( Status status )
-	{
-		this.status = status;
 	}
 
     public enum Status {

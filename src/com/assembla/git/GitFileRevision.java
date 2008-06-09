@@ -12,14 +12,14 @@ import java.util.Date;
 
 public class GitFileRevision implements VcsFileRevision
 {
-	private FilePath path;
-	private GitRevisionNumber revision;
-	private Date revisionDate;
+	private final FilePath path;
+	private final GitRevisionNumber revision;
+	private final Date revisionDate;
+    private final String author;
+	private final String message;
+    private final Project project;
 
-    private String author;
-	private String message;
-	private byte[] content;
-	private Project project;
+    private byte[] content;
 
     public GitFileRevision(
 			Project project,

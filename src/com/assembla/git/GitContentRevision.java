@@ -13,12 +13,12 @@ import java.io.ByteArrayInputStream;
 
 public class GitContentRevision implements ContentRevision
 {
-	private FilePath file;
-	private GitRevisionNumber revision;
-	private byte[] content;
-	private Project project;
+	private final FilePath file;
+	private final GitRevisionNumber revision;
+    private final Project project;
+    private byte[] content;
 
-	public GitContentRevision( FilePath filePath, GitRevisionNumber revision, Project project )
+    public GitContentRevision( FilePath filePath, GitRevisionNumber revision, Project project )
 	{
 		this.project = project;
 		this.file = filePath;

@@ -26,10 +26,10 @@ public class GitCommand
     private static final String SHOW_CMD = "show";
 	private static final String DELETE_CMD = "rm";
 
-	private Project project;
+	private final Project project;
 	private final GitVcsSettings settings;
-	private VirtualFile vcsRoot;
-    private GitLogParser gitLogParser = new GitLogParser();
+	private final VirtualFile vcsRoot;
+    private final GitLogParser gitLogParser = new GitLogParser();
 
     public GitCommand( @NotNull final Project project, @NotNull GitVcsSettings settings, @NotNull VirtualFile vcsRoot )
 	{
@@ -470,24 +470,7 @@ public class GitCommand
 		add( files.toArray( new VirtualFile[files.size()] ) );
 	}
 
-	/**
-	 * Clones the repository to the specified path.
-	 *
-	 * @param src	The src repository. May be a URL or a path.
-	 * @param target The target directory.
-	 * @throws com.intellij.openapi.vcs.VcsException
-	 *          If an error occurs.
-	 */
-	public void cloneRepository( String src, String target ) throws VcsException
-	{
-		String[] args = new String[2];
-		args[0] = src;
-		args[1] = target;
-
-		execute( "clone", (String) null, args );
-	}
-
-	/**
+    /**
 	 * Moves a file to a new directory.
 	 *
 	 * @param file	  The file to move.
@@ -504,7 +487,7 @@ public class GitCommand
 		execute( "rename", (String[]) null, args );
 	}
 
-	/**
+    /**
 	 * Moves a file to a new directory.
 	 *
 	 * @param file	The file to move.
@@ -520,7 +503,8 @@ public class GitCommand
 		args[1] = getRelativeFilePath( file.getParent().getPath() + "/" + newName, vcsRoot );
 		execute( "rename", (String[]) null, args );
 	}
-	/**
+
+    /**
 	 * Copies a file
 	 *
 	 * @param file	The file to copy.
@@ -537,5 +521,22 @@ public class GitCommand
 		args[1] = getRelativeFilePath( toDir.getPath() + "/" + copyName, vcsRoot );
 		execute( "copy", (String[]) null, args );
 	}
+
+    /**
+     * Clones the repository to the specified path.
+     *
+     * @param src	The src repository. May be a URL or a path.
+     * @param target The target directory.
+     * @throws com.intellij.openapi.vcs.VcsException
+     *          If an error occurs.
+     */
+    public void cloneRepository( String src, String target ) throws VcsException
+    {
+        String[] args = new String[2];
+        args[0] = src;
+        args[1] = target;
+
+        execute( "clone", (String) null, args );
+    }
 
 }

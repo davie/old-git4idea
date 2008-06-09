@@ -67,7 +67,7 @@ public class GitChangeProvider implements ChangeProvider
 		GitCommand command = new GitCommand( project, settings, vcsRoot );
 		try
 		{
-			//grab all changes per vcs root in one hg st command
+			//grab all changes per vcs root in one git ls-files command
 			changes.addAll( command.status( vcsRoot.getPath(), false ) );
 			vcsRoots.add( vcsRoot );
 		}

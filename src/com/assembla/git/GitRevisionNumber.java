@@ -14,9 +14,7 @@ public class GitRevisionNumber implements VcsRevisionNumber
 
     public String asString()
 	{
-		if( TIP.equals(version) )
-			return "tip";
-		return String.valueOf( version );
+		return version;
 	}
 
     // TODO ordering on hash doesn't make sense
