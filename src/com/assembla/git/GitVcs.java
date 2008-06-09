@@ -157,9 +157,9 @@ public class GitVcs extends AbstractVcs implements Disposable
 
 	}
 
-	public static com.assembla.git.GitVcs getInstance( Project project )
+	public static GitVcs getInstance( Project project )
 	{
-		return (com.assembla.git.GitVcs) ProjectLevelVcsManager.getInstance( project ).findVcsByName( "Git" );
+		return (GitVcs) ProjectLevelVcsManager.getInstance( project ).findVcsByName( "Git" );
 	}
 
 	@Nullable

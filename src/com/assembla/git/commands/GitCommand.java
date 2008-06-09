@@ -1,16 +1,12 @@
 package com.assembla.git.commands;
 
 import com.assembla.git.*;
-import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.util.EnvironmentUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -27,35 +23,34 @@ public class GitCommand
 	private static final String DELETE_CMD = "rm";
 
 	private final Project project;
-	private final GitVcsSettings settings;
-	private final VirtualFile vcsRoot;
+    private final VirtualFile vcsRoot;
     private final GitLogParser gitLogParser = new GitLogParser();
+    private final CommandExecutor commandExecutor;
 
     public GitCommand( @NotNull final Project project, @NotNull GitVcsSettings settings, @NotNull VirtualFile vcsRoot )
 	{
 		this.vcsRoot = vcsRoot;
 		this.project = project;
-		this.settings = settings;
-	}
+        this.commandExecutor = new CommandExecutor(settings, project, vcsRoot);
+    }
 
 
 	public void add( VirtualFile[] files ) throws VcsException
 	{
-		String baseDirStr = getBasePath();
-		String[] fixedFileNames = new String[files.length];
+        String[] fixedFileNames = new String[files.length];
 		int count = 0;
 		for( VirtualFile file : files )
 		{
-			if( file.getPath().substring( 0, baseDirStr.length() ).equals( baseDirStr ) )
+			if( file.getPath().startsWith(basePath()) )
 			{
-				fixedFileNames[count] = getRelativeFilePath( file, vcsRoot );
+				fixedFileNames[count] = getRelativeFilePath( file, vcsRoot);
 				count++;
 			}
 			else
 				GitVcs.getInstance( project ).showMessages( "Not in scope: " + file.getPath() );
 		}
 
-		execute( ADD_CMD, (String[]) null, fixedFileNames );
+		commandExecutor.execute( ADD_CMD, (String[]) null, fixedFileNames );
 	}
 
 	private String getRelativeFilePath( VirtualFile file, @NotNull final VirtualFile baseDir )
@@ -65,7 +60,7 @@ public class GitCommand
 
 	private String getRelativeFilePath( String file, @NotNull final VirtualFile baseDir )
 	{
-		final String basePath = baseDir.getPath();
+        final String basePath = baseDir.getPath();
 		if( !file.startsWith( basePath ) )
 			return file;
 		else if( file.equals( basePath ) )
@@ -112,8 +107,8 @@ public class GitCommand
 
         // -c gives cached, we might not need this.
         // to get a more parsable form of output (possibly -z too)
-        String output = convertStreamToString( execute( "ls-files", args ) );
-        return new GitStatusParser(getBasePath()).parse(output);
+        String output = convertStreamToString( commandExecutor.execute( "ls-files", args ) );
+        return new GitStatusParser(basePath()).parse(output);
 	}
 
 
@@ -133,7 +128,7 @@ public class GitCommand
 		String vcsPath = getRelativeFilePath( path, vcsRoot );
         String options = revision + ":" + vcsPath;
 
-		InputStream in = execute(SHOW_CMD, options);
+		InputStream in = commandExecutor.execute(SHOW_CMD, options);
 
 		try
 		{
@@ -156,7 +151,7 @@ public class GitCommand
 	 */
 	public void revert( VirtualFile[] files ) throws VcsException
 	{
-		String baseDirStr = getBasePath();
+		String baseDirStr = basePath();
 		String[] fixedFileNames = new String[files.length];
 		int count = 0;
 		for( VirtualFile file : files )
@@ -169,171 +164,10 @@ public class GitCommand
 			else
 				GitVcs.getInstance( project ).showMessages( "Not in scope: " + file.getPath() );
 		}
-		execute( REVERT_CMD, "--no-backup", fixedFileNames );
+		commandExecutor.execute( REVERT_CMD, "--no-backup", fixedFileNames );
 	}
 
-	private InputStream execute( String cmd, String arg ) throws VcsException
-	{
-		return execute( cmd, null, arg );
-	}
-
-	private InputStream execute( String cmd, String oneOption, String[] args ) throws VcsException
-	{
-		String[] options = new String[1];
-		options[0] = oneOption;
-
-		return execute( cmd, options, args );
-	}
-
-	private InputStream execute( String cmd, String option, String arg ) throws VcsException
-	{
-		String[] options = null;
-		if( option != null )
-		{
-			options = new String[1];
-			options[0] = option;
-		}
-		String[] args = null;
-		if( arg != null )
-		{
-			args = new String[1];
-			args[0] = arg;
-		}
-
-		return execute( cmd, options, args );
-	}
-
-	private InputStream execute( String cmd, String[] options, String[] args ) throws VcsException
-	{
-		List<String> cmdLine = new ArrayList<String>();
-		if( options != null )
-		{
-			cmdLine.addAll( Arrays.asList( options ) );
-		}
-		if( args != null )
-		{
-			cmdLine.addAll( Arrays.asList( args ) );
-		}
-		return execute( cmd, cmdLine );
-	}
-
-	private InputStream execute( String cmd ) throws VcsException
-	{
-		return execute( cmd, Collections.<String>emptyList() );
-	}
-
-	private InputStream execute( String cmd, List<String> cmdArgs ) throws VcsException
-	{
-		/*
-		 * First, we build the proper command line. Then we execute it.
-		 */
-
-		PathManager.getPluginsPath();
-
-
-		List<String> cmdLine = new ArrayList<String>();
-
-		String[] execCmds = settings.GIT_EXECUTABLE.split( " " );
-        cmdLine.addAll(Arrays.asList(execCmds));
-
-		cmdLine.add( cmd );
-		cmdLine.addAll( cmdArgs );
-
-		String cmdString = StringUtil.join( cmdLine, " " );
-		GitVcs.getInstance( project ).showMessages( "CMD: " + cmdString );
-
-		/*
-		 * We now have the command line, so we execute it.
-		 */
-		File directory = VfsUtil.virtualToIoFile( vcsRoot );
-
-		try
-		{
-			final Map<String, String> environment = EnvironmentUtil.getEnviromentProperties();
-
-			ProcessBuilder builder = new ProcessBuilder( cmdLine );
-			builder.directory( directory );
-
-			Map<String, String> defaultEnv = builder.environment();
-			// TODO: This may be completely redundant. Where does Idea get it's env. from?
-			// This assumes that we replace the envionment
-			for( String key : environment.keySet() )
-				defaultEnv.put( key, environment.get( key ) );
-
-			Process proc = builder.start();
-			final InputStream in = proc.getInputStream();
-			final ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-			/*
-			 * Start a thread to read the input stream. This prevents the process from blocking in
-			 * waitFor() when the output buffer fills up.
-			 */
-			new Thread(
-					new Runnable()
-					{
-						public void run()
-						{
-							byte[] buf = new byte[4096];
-							int count;
-							try
-							{
-								while( (count = in.read( buf, 0, 4096 )) != -1 )
-									out.write( buf, 0, count );
-							}
-							catch( IOException e )
-							{
-								// Do nothing. Stream is probably already closed.
-							}
-						}
-					} ).start();
-
-			/*
-			 * Thread for reading stderr.
-			 */
-			final StringBuilder stderrMessage = new StringBuilder();
-			final BufferedReader stderr = new BufferedReader( new InputStreamReader( proc.getErrorStream() ) );
-			new Thread( new Runnable()
-			{
-
-				public void run()
-				{
-					String in;
-					try
-					{
-						while( (in = stderr.readLine()) != null )
-							stderrMessage.append( in );
-					}
-					catch( IOException e )
-					{
-						// Do nothing. Stream is probably already closed.
-					}
-				}
-			} ).start();
-
-			proc.waitFor();
-
-			if( stderrMessage.length() != 0 )
-				GitVcs.getInstance( project ).showMessages( "ERROR: " + stderrMessage.toString() );
-
-			ByteArrayInputStream result = new ByteArrayInputStream( out.toByteArray() );
-
-			// Clean up.
-			in.close();
-			out.close();
-			stderr.close();
-			return result;
-		}
-		catch( InterruptedException e )
-		{
-			throw new VcsException( e );
-		}
-		catch( IOException e )
-		{
-			throw new VcsException( e );
-		}
-	}
-
-	public static String convertStreamToString( InputStream in ) throws VcsException
+    public static String convertStreamToString( InputStream in ) throws VcsException
 	{
 		BufferedReader reader = new BufferedReader( new InputStreamReader( in ) );
 		StringWriter result = new StringWriter();
@@ -358,7 +192,7 @@ public class GitCommand
 	 *
 	 * @return The base path of the project.
 	 */
-	private String getBasePath()
+	private String basePath()
 	{
 		return vcsRoot.getPath();
 	}
@@ -374,12 +208,12 @@ public class GitCommand
 		for( String path : paths )
 			args[i++] = getRelativeFilePath( path, vcsRoot );
 
-		execute( "commit", options, args );
+		commandExecutor.execute( "commit", options, args );
 	}
 
 	public void delete( VirtualFile[] files ) throws VcsException
 	{
-		String baseDirStr = getBasePath();
+		String baseDirStr = basePath();
 		String[] fixedFileNames = new String[files.length];
 		int count = 0;
 		for( VirtualFile file : files )
@@ -393,7 +227,7 @@ public class GitCommand
 				GitVcs.getInstance( project ).showMessages( "Not in scope: " + file.getPath() );
 		}
 
-		execute( DELETE_CMD, (String[]) null, fixedFileNames );
+		commandExecutor.execute( DELETE_CMD, (String[]) null, fixedFileNames );
 	}
 
 	/**
@@ -417,7 +251,7 @@ public class GitCommand
 						getRelativeFilePath( filePath.getPath(), vcsRoot )
 				};
 
-		String result = convertStreamToString( execute( "log", options, args ) );
+		String result = convertStreamToString( commandExecutor.execute( "log", options, args ) );
 		GitVcs.getInstance( project ).showMessages( result );
 
 
@@ -426,12 +260,12 @@ public class GitCommand
 
     public String version() throws VcsException
 	{
-		return convertStreamToString( execute( "version" ) );
+		return convertStreamToString( commandExecutor.execute( "version" ) );
 	}
 
 	public String tag( String tagName ) throws VcsException
 	{
-		return convertStreamToString( execute( "tag", tagName ) );
+		return convertStreamToString( commandExecutor.execute( "tag", tagName ) );
 	}
 
 	public void pull( String respository, boolean update ) throws VcsException
@@ -440,18 +274,18 @@ public class GitCommand
 		if( update )
 			options = "-u";
 
-		String result = convertStreamToString( execute( "pull", options, respository ) );
+		String result = convertStreamToString( commandExecutor.execute( "pull", options, respository ) );
 		GitVcs.getInstance( project ).showMessages( result );
 	}
 
 	public void merge() throws VcsException
 	{
-		execute( "merge" );
+		commandExecutor.execute( "merge" );
 	}
 
 	public void push( String repository ) throws VcsException
 	{
-		String result = convertStreamToString( execute( "push", repository ) );
+		String result = convertStreamToString( commandExecutor.execute( "push", repository ) );
 		GitVcs.getInstance( project ).showMessages( result );
 	}
 
@@ -484,7 +318,7 @@ public class GitCommand
 
 		args[0] = getRelativeFilePath( file, vcsRoot );
 		args[1] = getRelativeFilePath( newParent.getPath() + "/" + file.getName(), vcsRoot );
-		execute( "rename", (String[]) null, args );
+		commandExecutor.execute( "rename", (String[]) null, args );
 	}
 
     /**
@@ -501,7 +335,7 @@ public class GitCommand
 
 		args[0] = getRelativeFilePath( file, vcsRoot );
 		args[1] = getRelativeFilePath( file.getParent().getPath() + "/" + newName, vcsRoot );
-		execute( "rename", (String[]) null, args );
+		commandExecutor.execute( "rename", (String[]) null, args );
 	}
 
     /**
@@ -519,7 +353,7 @@ public class GitCommand
 
 		args[0] = getRelativeFilePath( file, vcsRoot );
 		args[1] = getRelativeFilePath( toDir.getPath() + "/" + copyName, vcsRoot );
-		execute( "copy", (String[]) null, args );
+		commandExecutor.execute( "copy", (String[]) null, args );
 	}
 
     /**
@@ -536,7 +370,7 @@ public class GitCommand
         args[0] = src;
         args[1] = target;
 
-        execute( "clone", (String) null, args );
+        commandExecutor.execute( "clone", (String) null, args );
     }
 
 }
