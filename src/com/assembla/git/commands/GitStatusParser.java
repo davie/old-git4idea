@@ -63,6 +63,8 @@ class GitStatusParser {
             return GitFile.Status.DELETED;
         else if (status.equals("C"))
             return GitFile.Status.UNMODIFIED;
+        else if (status.equals("H"))
+            return GitFile.Status.ADDED;
         else if (status.equals("I"))
             return GitFile.Status.IGNORED;
 

@@ -1,25 +1,22 @@
 package com.assembla.git;
 
 import com.intellij.openapi.vcs.VcsException;
-import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.VfsUtil;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.project.Project;
 import com.intellij.util.EnvironmentUtil;
 
 import java.io.*;
 import java.util.*;
 
 public class CommandExecutor {
-    private final GitVcsSettings settings;
-    private final Project project;
-    private final VirtualFile vcsRoot;
+    private final String gitExecutable;
+    private IErrorHandler errorHandler;
+    private File vcsRootDirectory;
 
-    public CommandExecutor(GitVcsSettings settings, Project project, VirtualFile vcsRoot) {
-        this.settings = settings;
-        this.project = project;
-        this.vcsRoot = vcsRoot;
+    public CommandExecutor(String gitExecutable, IErrorHandler errorHandler, File vcsRootDirectory) {
+        this.gitExecutable = gitExecutable;
+        this.errorHandler = errorHandler;
+        this.vcsRootDirectory = vcsRootDirectory;
+
     }
 
     public InputStream execute( String cmd, String arg ) throws VcsException
@@ -78,31 +75,31 @@ public class CommandExecutor {
          * First, we build the proper command line. Then we execute it.
          */
 
-        PathManager.getPluginsPath();
+//        PathManager.getPluginsPath();
 
 
         List<String> cmdLine = new ArrayList<String>();
 
-        String[] execCmds = settings.GIT_EXECUTABLE.split( " " );
+        String[] execCmds = gitExecutable.split( " " );
         cmdLine.addAll(Arrays.asList(execCmds));
 
         cmdLine.add( cmd );
         cmdLine.addAll( cmdArgs );
 
         String cmdString = StringUtil.join( cmdLine, " " );
-        GitVcs.getInstance( project ).showMessages( "CMD: " + cmdString );
+        errorHandler.displayErrorMessage("CMD: " + cmdString);
 
         /*
          * We now have the command line, so we execute it.
          */
-        File directory = VfsUtil.virtualToIoFile( vcsRoot );
 
         try
         {
+            // FIXME remove intellij specifics
             final Map<String, String> environment = EnvironmentUtil.getEnviromentProperties();
 
             ProcessBuilder builder = new ProcessBuilder( cmdLine );
-            builder.directory( directory );
+            builder.directory(vcsRootDirectory);
 
             Map<String, String> defaultEnv = builder.environment();
             // TODO: This may be completely redundant. Where does Idea get it's env. from?
@@ -162,8 +159,10 @@ public class CommandExecutor {
 
             proc.waitFor();
 
-            if( stderrMessage.length() != 0 )
-                GitVcs.getInstance( project ).showMessages( "ERROR: " + stderrMessage.toString() );
+            if( stderrMessage.length() != 0 ) {
+                String message = "ERROR: " + stderrMessage.toString();
+                errorHandler.displayErrorMessage(message);
+            }
 
             ByteArrayInputStream result = new ByteArrayInputStream( out.toByteArray() );
 
@@ -182,4 +181,5 @@ public class CommandExecutor {
             throw new VcsException( e );
         }
     }
+
 }

@@ -7,6 +7,7 @@ import com.intellij.openapi.vcs.FilePath;
 import com.intellij.openapi.vcs.VcsException;
 import com.intellij.openapi.vcs.history.VcsFileRevision;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VfsUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -31,7 +32,7 @@ public class GitCommand
 	{
 		this.vcsRoot = vcsRoot;
 		this.project = project;
-        this.commandExecutor = new CommandExecutor(settings, project, vcsRoot);
+        this.commandExecutor = new CommandExecutor(settings.GIT_EXECUTABLE, new ErrorHandler(project), VfsUtil.virtualToIoFile(vcsRoot));
     }
 
 
@@ -99,9 +100,10 @@ public class GitCommand
         args.add("-d");
         args.add("-m");
         args.add("-o");
+        args.add("-c");
         args.add("-t");
-        if( includeAll )
-			args.add( "-A" );
+//        if( includeAll )
+//			args.add( "-A" );
 		if( path != null )
 			args.add( getRelativeFilePath( path, vcsRoot ) );
 
@@ -373,4 +375,7 @@ public class GitCommand
         commandExecutor.execute( "clone", (String) null, args );
     }
 
+    public void init() throws VcsException {
+        commandExecutor.execute("init");
+    }
 }
