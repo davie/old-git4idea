@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.matchers.IsCollectionContaining;
 import static org.junit.Assert.assertThat;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -45,7 +45,7 @@ public class GitCommandIntegrationTest {
     }
 
     @Test
-    public void anEmptyRepositoryWithAnAddedFileShouldShowOneFileAdded() throws Exception {
+    public void aRepositoryWithAnAddedAndUnversionedFileShouldShowStatusesCorrectly() throws Exception {
         GitStatusCommand gitCommand = new GitStatusCommand(sysOutPrintingErrorHandler(), baseDir, GIT_EXECUTABLE);
 
         //create an empty repo
@@ -64,16 +64,18 @@ public class GitCommandIntegrationTest {
         GitFile fileWithStatusUnversioned = new GitFile(unversionedFile.getAbsolutePath(), GitFile.Status.UNVERSIONED);
         GitFile fileWithStatusNew = new GitFile(addedFile.getAbsolutePath(), GitFile.Status.ADDED);
 
-        assertThat(files, is(collectionContaining(Matchers.allOf(
-//                equalTo(fileWithStatusUnversioned)
+        assertThat(files, is(collectionContaining(allOf(
                 equalTo(fileWithStatusNew)
         ))));
-//        asser
+
+        assertThat(files, is(collectionContaining(allOf(
+                equalTo(fileWithStatusUnversioned)
+        ))));
 
     }
 
     private IsCollectionContaining<GitFile> collectionContaining(Matcher<GitFile> matchers) {
-        return new IsCollectionContaining(matchers);
+        return new IsCollectionContaining<GitFile>(matchers);
     }
 
     private IErrorHandler sysOutPrintingErrorHandler() {
